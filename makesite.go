@@ -1,12 +1,39 @@
 package main
 
-<<<<<<< HEAD
 import (
+	"html/template"
 	"io/ioutil"
+	"os"
 )
 
-func main() {
+type entry struct {
+	Name string
+	Done bool
+}
 
+type ToDo struct {
+	User string
+	List []entry
+}
+
+func main() {
+	// Files are provided as a slice of strings.
+	paths := []string{
+		"template.tmpl",
+	}
+
+	post := readFile()
+
+	t := template.Must(template.New("template.tmpl").ParseFiles(paths...))
+	file, err := os.Create("first-post.html")
+	if err != nil {
+		panic(err)
+	}
+
+	err = t.Execute(file, post)
+	if err != nil {
+		panic(err)
+	}
 }
 
 func readFile() string {
@@ -18,11 +45,11 @@ func readFile() string {
 	return string(fileContents)
 }
 
-func renderTemplate()
-=======
-import "fmt"
-
-func main() {
-	fmt.Println("Hello, world!")
+func writeFile(text string) {
+	bytesToWrite := []byte(text)
+	err := ioutil.WriteFile("first-post.html", bytesToWrite, 0644)
+	if err != nil {
+		panic(err)
+	}
+	return
 }
->>>>>>> 9514ac8a2c135a448a2b15a4b246dcd5d59ee7bf
