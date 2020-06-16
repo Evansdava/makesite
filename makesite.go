@@ -16,38 +16,36 @@ func main() {
 
 	flag.Parse()
 
-	var posts []string
-
 	if *ff != "" {
-		posts[0] = *ff
+		makePost(*ff)
 	} else {
-		files, err := ioutil.ReadDir(*df)
-		if err != nil {
-			fmt.Print(err)
-		} else {
-			for _, f := range files {
-				if f.IsDir() {
-					subfiles, err := ioutil.ReadDir(f.Name())
-					if err != nil {
-						fmt.Print(err)
-					} else {
-						for _, sub := range subfiles {
-							files = append(files, sub)
-						}
-					}
-				} else if strings.HasSuffix(f.Name(), ".txt") {
-					fmt.Println(f.Name())
-					posts = append(posts, f.Name())
-				}
+		parseDir(*df)
+	}
+}
+
+func parseDir(dir string) {
+	files, err := ioutil.ReadDir(dir)
+	if err != nil {
+		fmt.Print("Error reading files: ")
+		fmt.Println(err)
+	} else {
+		for _, f := range files {
+			if f.IsDir() {
+				fmt.Println(f.Name())
+				parseDir(fmt.Sprintf("%s/%s", dir, f.Name()))
+			} else if strings.HasSuffix(f.Name(), ".txt") {
+				fmt.Println(f.Name())
+				fmt.Println(dir + "/" + f.Name())
+				makePost(dir + "/" + f.Name())
 			}
 		}
 	}
+}
 
-	for _, post := range posts {
-		content := readFile(post)
-		newName := strings.Split(post, ".")[0] + ".html"
-		writeFile(newName, content)
-	}
+func makePost(name string) {
+	content := readFile(name)
+	newName := strings.Split(name, ".txt")[0] + ".html"
+	writeFile(newName, content)
 }
 
 func readFile(fileName string) string {
