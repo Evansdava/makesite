@@ -2,31 +2,52 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"html/template"
 	"io/ioutil"
 	"os"
 	"strings"
 )
 
-type entry struct {
-	Name string
-	Done bool
-}
-
-type ToDo struct {
-	User string
-	List []entry
-}
-
 func main() {
-	sp := flag.String("file", "first-post.txt", "Name of the .txt file (including extension) to be read.")
+	ff := flag.String("file", "", "Name of the .txt file (including extension) to be read.")
+
+	df := flag.String("dir", ".", "The directory to read text files from.")
+
 	flag.Parse()
 
-	post := readFile(*sp)
+	var posts []string
 
-	newName := strings.Split(*sp, ".")[0] + ".html"
+	if *ff != "" {
+		posts[0] = *ff
+	} else {
+		files, err := ioutil.ReadDir(*df)
+		if err != nil {
+			fmt.Print(err)
+		} else {
+			for _, f := range files {
+				if f.IsDir() {
+					subfiles, err := ioutil.ReadDir(f.Name())
+					if err != nil {
+						fmt.Print(err)
+					} else {
+						for _, sub := range subfiles {
+							files = append(files, sub)
+						}
+					}
+				} else if strings.HasSuffix(f.Name(), ".txt") {
+					fmt.Println(f.Name())
+					posts = append(posts, f.Name())
+				}
+			}
+		}
+	}
 
-	writeFile(newName, post)
+	for _, post := range posts {
+		content := readFile(post)
+		newName := strings.Split(post, ".")[0] + ".html"
+		writeFile(newName, content)
+	}
 }
 
 func readFile(fileName string) string {
