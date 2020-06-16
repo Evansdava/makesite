@@ -31,7 +31,6 @@ func parseDir(dir string) {
 	} else {
 		for _, f := range files {
 			if f.IsDir() {
-				fmt.Println(f.Name())
 				parseDir(fmt.Sprintf("%s/%s", dir, f.Name()))
 			} else if strings.HasSuffix(f.Name(), ".txt") {
 				fmt.Println(f.Name())
