@@ -7,6 +7,8 @@ import (
 	"io/ioutil"
 	"os"
 	"strings"
+
+	"github.com/russross/blackfriday/v2"
 )
 
 func main() {
@@ -43,20 +45,22 @@ func parseDir(dir string) {
 
 func makePost(name string) {
 	content := readFile(name)
+	parsed := blackfriday.Run(content)
+
 	newName := strings.Split(name, ".txt")[0] + ".html"
-	writeFile(newName, content)
+	writeFile(newName, parsed)
 }
 
-func readFile(fileName string) string {
+func readFile(fileName string) []byte {
 	fileContents, err := ioutil.ReadFile(fileName)
 	if err != nil {
 		panic(err)
 	}
 
-	return string(fileContents)
+	return fileContents
 }
 
-func writeFile(fileName string, text string) {
+func writeFile(fileName string, text []byte) {
 	// Files are provided as a slice of strings.
 	paths := []string{
 		"template.tmpl",
@@ -68,7 +72,7 @@ func writeFile(fileName string, text string) {
 		panic(err)
 	}
 
-	err = t.Execute(file, text)
+	err = t.Execute(file, template.HTML(text))
 	if err != nil {
 		panic(err)
 	}
